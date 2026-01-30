@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghost</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-color: #1a1a1a;
+            font-family: sans-serif;
+        }
+        #bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            z-index: 1;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* Dark Overlay */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3); /* 30% dark tint */
+            z-index: 2;
+        }
+
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 3;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center; /* Center horizontally */
+            align-items: flex-start; /* Start from top vertically */
+        }
+
+        #version-logo {
+            width: 50%; /* Requested 50% width */
+            max-width: 500px; /* Limit max width so it doesn't get huge on 4k screens */
+            margin-top: 8vh;  /* Requested 8% screen height margin */
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+            transition: transform 0.3s ease;
+        }
+
+        #version-logo:hover {
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 768px) {
+            #version-logo {
+                width: 50%;
+                margin-top: 15vh; /* Drop it down a bit more on mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="bg-layer"></div>
+    <div id="overlay"></div>
+
+    <div class="container">
+        <img id="version-logo" src="" alt="Minecraft Logo">
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const bgLayer = document.getElementById('bg-layer');
+            const logoImg = document.getElementById('version-logo');
+            const params = new URLSearchParams(window.location.search);
+            let version = params.get('v');
+			if (version) {
+                version = version.split('.').slice(0, 2).join('.');
+            }
+            const generalLogo = 'logo/general.png';
+            const generalArt  = 'artworks/general.png';
+
+            function setLogo() {
+                if (!version) {
+                    logoImg.src = generalLogo;
+                    return;
+                }
+                const logoPath = `logo/${version}.png`;
+                logoImg.onerror = function() {
+                    this.src = generalLogo;
+                    this.onerror = null;
+                };
+                logoImg.src = logoPath;
+            }
+
+            function setArtwork() {
+                if (!version) {
+                    bgLayer.style.backgroundImage = `url('${generalArt}')`;
+                    return;
+                }
+                const extension = (version === '1.6') ? 'jpg' : 'png';
+                const artPath = `artworks/${version}.${extension}`;
+                
+                const imgLoader = new Image();
+                imgLoader.onload = function() {
+                    bgLayer.style.backgroundImage = `url('${artPath}')`;
+                };
+                imgLoader.onerror = function() {
+                    bgLayer.style.backgroundImage = `url('${generalArt}')`;
+                };
+                imgLoader.src = artPath;
+            }
+
+            setLogo();
+            setArtwork();
+        });
+    </script>
+</body>
+</html>
