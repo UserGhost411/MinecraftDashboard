@@ -87,63 +87,47 @@
             var results = regex.exec(location.search);
             return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
         }
-
-
-        document.addEventListener("DOMContentLoaded", function() {
+        window.onload = function() {
             var bgLayer = document.getElementById('bg-layer');
             var logoImg = document.getElementById('version-logo');
-            
-            var rawVersion = getQueryParam('v');
-            var version = rawVersion;
+            var version = getQueryParam('v');
             if (version && version.indexOf('.') > -1) {
                 var parts = version.split('.');
                 if (parts.length >= 2) {
                     version = parts.slice(0, 2).join('.');
                 }
             }
-
             var generalLogo = 'logo/general.png';
             var generalArt  = 'artworks/general.png';
-
-            function setLogo() {
-                if (!version) {
+            if (!version) {
+                logoImg.src = generalLogo;
+            } else {
+                var tempLogo = new Image();
+                var targetLogoPath = 'logo/' + version + '.png';
+                tempLogo.onload = function() {
+                    logoImg.src = targetLogoPath;
+                };
+                tempLogo.onerror = function() {
                     logoImg.src = generalLogo;
-                    return;
-                }
-                var logoPath = 'logo/' + version + '.png';
-                
-                logoImg.onerror = function() {
-                    this.src = generalLogo;
-
-                    this.onerror = null; 
                 };
-                logoImg.src = logoPath;
+                tempLogo.src = targetLogoPath;
             }
 
-            function setArtwork() {
-                if (!version) {
-                    bgLayer.style.backgroundImage = "url('" + generalArt + "')";
-                    return;
-                }
-               
-                var artPath = 'artworks/' + version + '.png';
-                
-                var imgLoader = new Image();
-                
-                imgLoader.onload = function() {
-                    bgLayer.style.backgroundImage = "url('" + artPath + "')";
+            if (!version) {
+                bgLayer.style.backgroundImage = "url('" + generalArt + "')";
+            } else {
+                var extension = (version === '1.6') ? 'jpg' : 'png';
+                var targetArtPath = 'artworks/' + version + '.' + extension;
+                var tempArt = new Image();
+                tempArt.onload = function() {
+                    bgLayer.style.backgroundImage = "url('" + targetArtPath + "')";
                 };
-                
-                imgLoader.onerror = function() {
+                tempArt.onerror = function() {
                     bgLayer.style.backgroundImage = "url('" + generalArt + "')";
                 };
-                
-                imgLoader.src = artPath;
+                tempArt.src = targetArtPath;
             }
-
-            setLogo();
-            setArtwork();
-        });
+        };
     </script>
 </body>
 </html>
